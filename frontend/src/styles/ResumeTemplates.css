@@ -1,0 +1,222 @@
+/* Base styles for all templates to ensure consistent printing/display */
+.preview-paper {
+    line-height: 1.5;
+    color: #333;
+}
+
+/* ==========================================================================
+   1. Modern
+   Clean, header with background, two-column layout if possible or structured blocks
+   ========================================================================== */
+.template-modern .preview-header-section {
+    background-color: #f3f4f6;
+    padding: 2rem;
+    margin: -2rem -2rem 2rem -2rem;
+    /* Negate parent padding */
+    border-bottom: 2px solid #e5e7eb;
+    text-align: center;
+}
+
+.template-modern .preview-name {
+    color: #111827;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+}
+
+.template-modern .preview-section-title {
+    color: #2563eb;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+}
+
+/* ==========================================================================
+   2. Classic
+   Serif fonts, centered header, traditional lines
+   ========================================================================== */
+.template-classic {
+    font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.template-classic .preview-header-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #000;
+    padding-bottom: 1rem;
+}
+
+.template-classic .preview-name {
+    color: #000;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.template-classic .preview-section-title {
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    color: #444;
+    font-weight: bold;
+    font-style: italic;
+    margin: 1.5rem 0 1rem 0;
+}
+
+.template-classic .preview-item-title {
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   3. Creative
+   Sidebar layout (simulated with grid/flex), colorful accents
+   ========================================================================== */
+.template-creative {
+    font-family: 'Poppins', sans-serif;
+}
+
+.template-creative .preview-paper {
+    padding: 0 !important;
+    /* Creative takes full width */
+    display: flex;
+    flex-direction: column;
+}
+
+.template-creative .creative-header {
+    background: #FF6B6B;
+    color: white;
+    padding: 2rem;
+}
+
+.template-creative .preview-name {
+    color: white;
+}
+
+.template-creative .preview-contact {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.template-creative .preview-links {
+    color: white;
+}
+
+.template-creative .creative-body {
+    padding: 2rem;
+}
+
+.template-creative .preview-section-title {
+    color: #FF6B6B;
+    border-left: 5px solid #FF6B6B;
+    padding-left: 10px;
+    border-bottom: none;
+}
+
+/* ==========================================================================
+   4. Minimal
+   Lots of whitespace, light thin fonts, no borders
+   ========================================================================== */
+.template-minimal {
+    font-family: 'Roboto', sans-serif;
+    color: #444;
+}
+
+.template-minimal .preview-header-section {
+    text-align: left;
+    margin-bottom: 3rem;
+}
+
+.template-minimal .preview-name {
+    font-weight: 300;
+    font-size: 3rem;
+    color: #000;
+}
+
+.template-minimal .preview-section-title {
+    font-weight: 300;
+    font-size: 1.5rem;
+    color: #888;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+}
+
+/* ==========================================================================
+   5. Professional
+   Corporate blue/grey, grid layout look, strong hierarchy
+   ========================================================================== */
+.template-professional {
+    font-family: 'Calibri', 'Arial', sans-serif;
+}
+
+.template-professional .preview-header-section {
+    background: #2c3e50;
+    color: white;
+    padding: 2rem;
+    margin: -2rem -2rem 2rem -2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.template-professional .preview-name {
+    color: white;
+    margin: 0;
+    text-align: left;
+}
+
+.template-professional .preview-contact {
+    color: #bdc3c7;
+    text-align: right;
+}
+
+.template-professional .preview-section-title {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 5px 10px;
+    border-left: 5px solid #2c3e50;
+    border-bottom: none;
+}
+
+/* ==========================================================================
+   6. Elegant
+   Centered, serif/script mix, gold accent
+   ========================================================================== */
+.template-elegant {
+    font-family: 'Garamond', serif;
+}
+
+.template-elegant .preview-name {
+    font-family: 'Playfair Display', serif;
+    color: #D4AF37;
+    /* Gold */
+    font-size: 2.8rem;
+    text-align: center;
+}
+
+.template-elegant .preview-contact {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+}
+
+.template-elegant .preview-section-title {
+    text-align: center;
+    color: #D4AF37;
+    border-bottom: 1px solid #D4AF37;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.template-elegant .preview-section-title::before,
+.template-elegant .preview-section-title::after {
+    content: "•";
+    color: #D4AF37;
+}
+
+/* Utility to ensure paper sizing fits */
+.preview-inner {
+    height: 100%;
+}

@@ -169,6 +169,33 @@ Provide 5 specific, actionable tips to improve ATS compatibility. Format as numb
         }
     }
 
+    // Optimize raw resume content for ATS
+    async optimizeForATSContent(resumeText, targetJobDescription = '') {
+        try {
+            const prompt = `Analyze this resume content and provide ATS optimization tips:
+
+Resume Content:
+${resumeText.substring(0, 5000)}... (truncated if too long)
+
+${targetJobDescription ? `Target Job: ${targetJobDescription}` : ''}
+
+Provide 5 specific, actionable tips to improve ATS compatibility. Format as numbered list.`;
+
+            const completion = await groq.chat.completions.create({
+                messages: [
+                    { role: "system", content: "You are an ATS optimization expert." },
+                    { role: "user", content: prompt }
+                ],
+                model: this.model,
+            });
+
+            return completion.choices[0]?.message?.content || '';
+        } catch (error) {
+            console.error('Groq API Error:', error);
+            throw new Error('Failed to optimize for ATS content');
+        }
+    }
+
     // Generic AI assistance for resume improvement
     async getResumeAdvice(section, content) {
         try {

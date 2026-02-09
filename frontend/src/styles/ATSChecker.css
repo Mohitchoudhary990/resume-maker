@@ -41,6 +41,42 @@
     border-color: var(--primary-color);
 }
 
+.resume-selection {
+    margin-bottom: 1rem;
+}
+
+.selection-label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+}
+
+.ats-select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.ats-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.loading-text,
+.no-resumes-text {
+    padding: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
 .ats-button {
     margin-top: 1rem;
     padding: 0.8rem 2rem;

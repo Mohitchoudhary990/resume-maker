@@ -55,6 +55,19 @@ export const optimizeATS = async (data) => {
     }
 };
 
+// Get ATS optimization tips for uploaded file
+export const optimizeATSFile = async (data) => {
+    try {
+        const response = await api.post('/ai/optimize-ats-file', data);
+        return response.data;
+    } catch (error) {
+        console.error('AI Service Error (optimizeATSFile):', error);
+        throw error;
+    }
+};
+
+// Get resume advice
+
 // Get resume advice
 export const getAdvice = async (data) => {
     try {

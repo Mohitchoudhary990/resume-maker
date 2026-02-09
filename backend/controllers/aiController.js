@@ -1,5 +1,6 @@
 import geminiService from '../services/groqService.js';
-import pdfService from '../services/pdfService.js';
+import pdfParser from '../services/pdfParserService.js';
+import resumeGenerator from '../services/resumeGeneratorService.js';
 import Resume from '../models/Resume.js';
 
 // @desc    Generate professional summary using AI
@@ -147,6 +148,58 @@ export const optimizeATS = async (req, res) => {
     }
 };
 
+// @desc    Get ATS optimization tips for uploaded resume file
+// @route   POST /api/ai/optimize-ats-file
+// @access  Private
+export const optimizeATSFile = async (req, res) => {
+    try {
+        console.log('📂 Optimize ATS File Request received');
+        console.log('Body keys:', Object.keys(req.body));
+        console.log('File details:', req.file ? {
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size
+        } : 'No file');
+
+        const { targetJobDescription } = req.body;
+        const file = req.file;
+
+        if (!file || !targetJobDescription) {
+            console.error('❌ Missing file or job description');
+            return res.status(400).json({
+                success: false,
+                message: 'Resume file and job description are required',
+            });
+        }
+
+        // Extract text from PDF
+        console.log('Extracting text from PDF...');
+        const resumeText = await pdfParser.extractText(file.buffer);
+        console.log('Extracted text length:', resumeText ? resumeText.length : 0);
+
+        if (!resumeText || resumeText.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Could not extract text from the uploaded PDF',
+            });
+        }
+
+        console.log('Calling Gemini service for content optimization...');
+        const tips = await geminiService.optimizeForATSContent(resumeText, targetJobDescription);
+
+        res.status(200).json({
+            success: true,
+            data: { tips }
+        });
+    } catch (error) {
+        console.error('Optimize ATS File error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to optimize for ATS'
+        });
+    }
+};
+
 // @desc    Get resume advice
 // @route   POST /api/ai/get-advice
 // @access  Private
@@ -198,7 +251,9 @@ export const generatePDF = async (req, res) => {
             });
         }
 
-        const pdfBuffer = await pdfService.generateResumePDF(resume, resume.template);
+
+
+        const pdfBuffer = await resumeGenerator.generateResumePDF(resume, resume.template);
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${resume.title || 'resume'}.pdf"`);

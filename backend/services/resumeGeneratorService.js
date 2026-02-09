@@ -2,7 +2,7 @@ import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
 
-class PDFService {
+class ResumeGeneratorService {
     // Generate PDF for resume
     async generateResumePDF(resumeData, template = 'modern') {
         return new Promise((resolve, reject) => {
@@ -363,4 +363,4 @@ class PDFService {
     }
 }
 
-export default new PDFService();
+export default new ResumeGeneratorService();

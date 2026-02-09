@@ -1,23 +1,43 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { ResumeContext } from '../context/ResumeContext';
+import { getResumes } from '../services/resumeService';
 import axios from 'axios';
 import '../styles/ATSChecker.css';
 
 const ATSChecker = () => {
-    const { currentResume } = useContext(ResumeContext);
-    const [jobDescription, setJobDescription] = useState('');
+    const { resumes, setResumes } = useContext(ResumeContext);
+    const [selectedResumeId, setSelectedResumeId] = useState('');
     const [analysis, setAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [resumesLoading, setResumesLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    useEffect(() => {
+        fetchResumes();
+    }, []);
+
+    const fetchResumes = async () => {
+        try {
+            const response = await getResumes();
+            if (response.success) {
+                setResumes(response.data);
+            }
+        } catch (err) {
+            setError('Failed to load resumes');
+        } finally {
+            setResumesLoading(false);
+        }
+    };
+
     const handleAnalyze = async () => {
-        if (!jobDescription.trim()) {
-            setError('Please enter a job description');
+        if (!selectedResumeId) {
+            setError('Please select a resume to check');
             return;
         }
 
-        if (!currentResume) {
-            setError('Please load a resume first (go to Dashboard -> Edit Resume)');
+        const selectedResume = resumes.find(r => r._id === selectedResumeId);
+        if (!selectedResume) {
+            setError('Selected resume not found');
             return;
         }
 
@@ -35,8 +55,8 @@ const ATSChecker = () => {
             };
 
             const response = await axios.post('http://localhost:5000/api/ats/analyze', {
-                resumeData: currentResume,
-                jobDescription
+                resumeData: selectedResume,
+                jobDescription: ''
             }, config);
 
             if (response.data.success) {
@@ -60,24 +80,40 @@ const ATSChecker = () => {
         <div className="ats-container">
             <h1 className="ats-title">ATS Resume Checker</h1>
             <p className="ats-subtitle">
-                Paste the job description below to check how well your resume matches.
+                Select a resume to check its ATS compatibility score.
             </p>
 
             <div className="ats-content">
                 <div className="ats-input-section">
-                    <textarea
-                        className="ats-textarea"
-                        placeholder="Paste Job Description here..."
-                        value={jobDescription}
-                        onChange={(e) => setJobDescription(e.target.value)}
-                        rows={10}
-                    />
+                    <div className="resume-selection">
+                        <label className="selection-label">Select Your Resume:</label>
+                        {resumesLoading ? (
+                            <p className="loading-text">Loading your resumes...</p>
+                        ) : resumes.length === 0 ? (
+                            <p className="no-resumes-text">
+                                No resumes found. Please create a resume first.
+                            </p>
+                        ) : (
+                            <select
+                                className="ats-select"
+                                value={selectedResumeId}
+                                onChange={(e) => setSelectedResumeId(e.target.value)}
+                            >
+                                <option value="">-- Choose a resume --</option>
+                                {resumes.map((resume) => (
+                                    <option key={resume._id} value={resume._id}>
+                                        {resume.title} ({resume.personalInfo?.fullName || 'Untitled'})
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
                     <button
                         className="ats-button"
                         onClick={handleAnalyze}
-                        disabled={loading}
+                        disabled={loading || !selectedResumeId || resumesLoading}
                     >
-                        {loading ? 'Analyzing...' : 'Check Score'}
+                        {loading ? 'Analyzing...' : 'Check ATS Score'}
                     </button>
                     {error && <div className="ats-error">{error}</div>}
                 </div>

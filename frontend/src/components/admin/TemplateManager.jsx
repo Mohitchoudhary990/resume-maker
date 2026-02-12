@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getTemplates, createTemplate, deleteTemplate, seedTemplates } from '../../services/templateService';
 
 const TemplateManager = () => {

@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { ResumeContext } from '../context/ResumeContext';
 import { getResumes } from '../services/resumeService';
 import axios from 'axios';
@@ -6,7 +6,10 @@ import '../styles/ATSChecker.css';
 
 const ATSChecker = () => {
     const { resumes, setResumes } = useContext(ResumeContext);
+    const [uploadMode, setUploadMode] = useState('saved'); // 'saved' or 'upload'
     const [selectedResumeId, setSelectedResumeId] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [jobDescription, setJobDescription] = useState('');
     const [analysis, setAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
     const [resumesLoading, setResumesLoading] = useState(true);
@@ -29,15 +32,30 @@ const ATSChecker = () => {
         }
     };
 
-    const handleAnalyze = async () => {
-        if (!selectedResumeId) {
-            setError('Please select a resume to check');
-            return;
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!validTypes.includes(file.type)) {
+                setError('Please upload a PDF or DOCX file');
+                setSelectedFile(null);
+                return;
+            }
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                setError('File size must be less than 5MB');
+                setSelectedFile(null);
+                return;
+            }
+            setSelectedFile(file);
+            setError(null);
         }
+    };
 
-        const selectedResume = resumes.find(r => r._id === selectedResumeId);
-        if (!selectedResume) {
-            setError('Selected resume not found');
+    const handleAnalyze = async () => {
+        if (!jobDescription.trim()) {
+            setError('Please provide a job description for accurate ATS scoring');
             return;
         }
 
@@ -46,21 +64,59 @@ const ATSChecker = () => {
         setAnalysis(null);
 
         try {
-            // Retrieve token from localStorage
             const token = localStorage.getItem('token');
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${token}`
+
+            if (uploadMode === 'upload') {
+                // File upload mode
+                if (!selectedFile) {
+                    setError('Please select a file to upload');
+                    setLoading(false);
+                    return;
                 }
-            };
 
-            const response = await axios.post('http://localhost:5000/api/ats/analyze', {
-                resumeData: selectedResume,
-                jobDescription: ''
-            }, config);
+                const formData = new FormData();
+                formData.append('resume', selectedFile);
+                formData.append('jobDescription', jobDescription);
 
-            if (response.data.success) {
-                setAnalysis(response.data.data);
+                const response = await axios.post('http://localhost:5000/api/ats/analyze-upload', formData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                if (response.data.success) {
+                    setAnalysis(response.data.data);
+                }
+            } else {
+                // Saved resume mode
+                if (!selectedResumeId) {
+                    setError('Please select a resume to check');
+                    setLoading(false);
+                    return;
+                }
+
+                const selectedResume = resumes.find(r => r._id === selectedResumeId);
+                if (!selectedResume) {
+                    setError('Selected resume not found');
+                    setLoading(false);
+                    return;
+                }
+
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                };
+
+                const response = await axios.post('http://localhost:5000/api/ats/analyze', {
+                    resumeData: selectedResume,
+                    jobDescription: jobDescription
+                }, config);
+
+                if (response.data.success) {
+                    setAnalysis(response.data.data);
+                }
             }
         } catch (err) {
             console.error('Analysis failed:', err);
@@ -80,38 +136,98 @@ const ATSChecker = () => {
         <div className="ats-container">
             <h1 className="ats-title">ATS Resume Checker</h1>
             <p className="ats-subtitle">
-                Select a resume to check its ATS compatibility score.
+                Check your resume's ATS compatibility score against a job description.
             </p>
 
             <div className="ats-content">
                 <div className="ats-input-section">
-                    <div className="resume-selection">
-                        <label className="selection-label">Select Your Resume:</label>
-                        {resumesLoading ? (
-                            <p className="loading-text">Loading your resumes...</p>
-                        ) : resumes.length === 0 ? (
-                            <p className="no-resumes-text">
-                                No resumes found. Please create a resume first.
-                            </p>
-                        ) : (
-                            <select
-                                className="ats-select"
-                                value={selectedResumeId}
-                                onChange={(e) => setSelectedResumeId(e.target.value)}
-                            >
-                                <option value="">-- Choose a resume --</option>
-                                {resumes.map((resume) => (
-                                    <option key={resume._id} value={resume._id}>
-                                        {resume.title} ({resume.personalInfo?.fullName || 'Untitled'})
-                                    </option>
-                                ))}
-                            </select>
-                        )}
+                    {/* Mode Toggle */}
+                    <div className="mode-toggle">
+                        <button
+                            className={`mode-btn ${uploadMode === 'saved' ? 'active' : ''}`}
+                            onClick={() => {
+                                setUploadMode('saved');
+                                setSelectedFile(null);
+                                setError(null);
+                            }}
+                        >
+                            📋 Saved Resumes
+                        </button>
+                        <button
+                            className={`mode-btn ${uploadMode === 'upload' ? 'active' : ''}`}
+                            onClick={() => {
+                                setUploadMode('upload');
+                                setSelectedResumeId('');
+                                setError(null);
+                            }}
+                        >
+                            📤 Upload File
+                        </button>
                     </div>
+
+                    {/* Resume Selection or File Upload */}
+                    {uploadMode === 'saved' ? (
+                        <div className="resume-selection">
+                            <label className="selection-label">Select Your Resume:</label>
+                            {resumesLoading ? (
+                                <p className="loading-text">Loading your resumes...</p>
+                            ) : resumes.length === 0 ? (
+                                <p className="no-resumes-text">
+                                    No resumes found. Please create a resume first.
+                                </p>
+                            ) : (
+                                <select
+                                    className="ats-select"
+                                    value={selectedResumeId}
+                                    onChange={(e) => setSelectedResumeId(e.target.value)}
+                                >
+                                    <option value="">-- Choose a resume --</option>
+                                    {resumes.map((resume) => (
+                                        <option key={resume._id} value={resume._id}>
+                                            {resume.title} ({resume.personalInfo?.fullName || 'Untitled'})
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="file-upload-section">
+                            <label className="selection-label">Upload Resume (PDF or DOCX):</label>
+                            <div className="file-input-wrapper">
+                                <input
+                                    type="file"
+                                    id="resume-file"
+                                    className="file-input"
+                                    accept=".pdf,.docx"
+                                    onChange={handleFileChange}
+                                />
+                                <label htmlFor="resume-file" className="file-input-label">
+                                    {selectedFile ? `📄 ${selectedFile.name}` : '📁 Choose File'}
+                                </label>
+                            </div>
+                            {selectedFile && (
+                                <p className="file-info">
+                                    Size: {(selectedFile.size / 1024).toFixed(2)} KB
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="job-description-section">
+                        <label className="selection-label">Job Description:</label>
+                        <textarea
+                            className="ats-textarea"
+                            placeholder="Paste the job description here for accurate ATS matching..."
+                            value={jobDescription}
+                            onChange={(e) => setJobDescription(e.target.value)}
+                            rows={8}
+                        />
+                    </div>
+
                     <button
                         className="ats-button"
                         onClick={handleAnalyze}
-                        disabled={loading || !selectedResumeId || resumesLoading}
+                        disabled={loading || !jobDescription.trim() || (uploadMode === 'saved' ? !selectedResumeId : !selectedFile)}
                     >
                         {loading ? 'Analyzing...' : 'Check ATS Score'}
                     </button>

@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import { getCurrentUser, logout as logoutService } from '../services/authService';
 
 export const AuthContext = createContext();

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { suggestSkills } from '../services/aiService';
 
 const Skills = ({ data, onChange }) => {

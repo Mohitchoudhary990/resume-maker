@@ -260,6 +260,47 @@ Do not include any markdown formatting or explanation, just the raw JSON object.
             throw new Error('Failed to calculate ATS score');
         }
     }
+
+    // Calculate ATS Score from raw text (for uploaded files)
+    async calculateATSScoreFromText(resumeText, jobDescription) {
+        try {
+            console.log('📊 Calculating ATS score from uploaded resume text...');
+
+            const prompt = `Analyze this resume text against the job description and provide a compatibility score.
+
+Resume Text:
+${resumeText}
+
+Job Description:
+${jobDescription}
+
+Return a valid JSON object with this EXACT structure:
+{
+  "score": <number between 0-100>,
+  "missingKeywords": ["<keyword1>", "<keyword2>", ...],
+  "formattingIssues": ["<issue1>", "<issue2>", ...],
+  "helpfulTips": ["<tip1>", "<tip2>", ...]
+}
+
+Do not include any markdown formatting or explanation, just the raw JSON object.`;
+
+            const completion = await groq.chat.completions.create({
+                messages: [
+                    { role: "system", content: "You are an expert ATS (Applicant Tracking System) algorithm." },
+                    { role: "user", content: prompt }
+                ],
+                model: this.model,
+                temperature: 0.3,
+                response_format: { type: "json_object" }
+            });
+
+            const response = completion.choices[0]?.message?.content;
+            return JSON.parse(response);
+        } catch (error) {
+            console.error('❌ Groq ATS Score from Text Error:', error.message);
+            throw new Error('Failed to calculate ATS score from text');
+        }
+    }
 }
 
 export default new GroqService();

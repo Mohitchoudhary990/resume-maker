@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ResumeContext } from '../context/ResumeContext';
 import { getResume, updateResume } from '../services/resumeService';

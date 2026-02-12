@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generatePDF } from '../services/aiService';
 import { getTemplates } from '../services/templateService';
 import ModernTemplate from './templates/ModernTemplate';

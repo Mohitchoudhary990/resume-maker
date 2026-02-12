@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { optimizeATS, optimizeATSFile, getAdvice } from '../services/aiService';
 
 const AIAssistant = ({ resume, onClose }) => {
